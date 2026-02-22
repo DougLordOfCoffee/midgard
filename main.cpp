@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
+#include "Player.h"
 
 int main(int argc, char* argv[]) {
 
@@ -37,9 +38,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Our square: x, y, width, height
-    SDL_Rect square = { 350, 250, 100, 100 };
-    int speed = 5;
+    // Our player
+    Player player(350, 250, 100, 100);
 
     int running = 1;
     SDL_Event event;
@@ -54,17 +54,12 @@ int main(int argc, char* argv[]) {
 
         // Check which keys are being held down RIGHT NOW
         const Uint8* keys = SDL_GetKeyboardState(NULL);
-
-        if (keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_UP])    square.y -= speed;
-        if (keys[SDL_SCANCODE_S] || keys[SDL_SCANCODE_DOWN])  square.y += speed;
-        if (keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_LEFT])  square.x -= speed;
-        if (keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT]) square.x += speed;
+        player.handleInput(keys);
 
         SDL_SetRenderDrawColor(renderer, 20, 20, 40, 255);
         SDL_RenderClear(renderer);
 
-        SDL_SetRenderDrawColor(renderer, 0, 255, 100, 255);
-        SDL_RenderFillRect(renderer, &square);
+        player.render(renderer);
 
         SDL_RenderPresent(renderer);
     }
