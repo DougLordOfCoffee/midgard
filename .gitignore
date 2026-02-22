@@ -1,0 +1,26 @@
+# IDE / editor
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Cursor
+.cursor/
+
+# Build outputs
+*.exe
+*.o
+*.obj
+*.out
+*.app
+*.dll
+!vendor/**/*.dll
+
+# Debug / temp
+*.pdb
+*.ilk
+*.log
+.DS_Store
+Thumbs.db
