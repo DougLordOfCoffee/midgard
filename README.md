@@ -1,7 +1,8 @@
 
 Welcome to the Midgard repository. To ensure we don't spend 4 hours debugging "File Not Found" errors, please follow these setup instructions exactly.
 
-🛠 Prerequisites & Setup
+Prerequisites & Setup
+
 We are using MinGW-w64 (via **MSYS2**). Make sure your compiler is 64-bit to match the libraries.
 
 **Lib instal:**
