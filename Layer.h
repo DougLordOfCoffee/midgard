@@ -1,7 +1,7 @@
 #ifndef LAYER_H
 #define LAYER_H
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 class Layer {
 public:

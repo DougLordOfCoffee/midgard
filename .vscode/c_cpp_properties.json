@@ -1,15 +1,15 @@
 {
     "configurations": [
         {
-            "name": "MinGW64",
+            "name": "Midgard-MinGW",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/SDK/SDL2-2.32.6/x86_64-w64-mingw32/include",
-                "C:/SDK/SDL2_image-2.0.5/x86_64-w64-mingw32/include",
-                "C:/SDK/SDL2_ttf-2.22.0/x86_64-w64-mingw32/include"
+                "C:/SDK/SDL2-2.32.6/x86_64-w64-mingw32/include/SDL2",
+                "C:/SDK/SDL2_image-2.0.5/x86_64-w64-mingw32/include/SDL2",
+                "C:/SDK/SDL2_ttf-2.22.0/x86_64-w64-mingw32/include/SDL2"
             ],
             "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
-            "compilerPath": "C:/msys64/mingw64/bin/g++.exe",
+            "compilerPath": "C:/msys64/ucrt64/bin/g++.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-gcc-x64"

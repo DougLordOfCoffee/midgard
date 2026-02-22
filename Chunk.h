@@ -3,7 +3,7 @@
 
 #include "Tile.h"
 #include "TextureManager.h"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 const int CHUNK_SIZE = 64;      // 64x64 tiles per chunk
 const int TILE_SIZE = 32;       // 32x32 pixels per tile

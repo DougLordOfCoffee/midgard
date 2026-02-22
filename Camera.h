@@ -1,7 +1,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 class Camera {
 public:

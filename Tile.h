@@ -1,7 +1,7 @@
 #ifndef TILE_H
 #define TILE_H
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <string>
 
 enum class TileType {

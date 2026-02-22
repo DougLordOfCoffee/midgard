@@ -8,8 +8,9 @@ SET SDL_TTF=%SDK_PATH%/SDL2_ttf-2.22.0/x86_64-w64-mingw32
 :: --- COMPILATION ---
 echo Building Midgard...
 
+:: Added /SDL2 to the end of the -I paths below
 g++ -std=c++17 *.cpp -o game.exe ^
--I"%SDL_CORE%/include" -I"%SDL_IMG%/include" -I"%SDL_TTF%/include" ^
+-I"%SDL_CORE%/include/SDL2" -I"%SDL_IMG%/include/SDL2" -I"%SDL_TTF%/include/SDL2" ^
 -L"%SDL_CORE%/lib" -L"%SDL_IMG%/lib" -L"%SDL_TTF%/lib" ^
 -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf ^
 -mwindows
