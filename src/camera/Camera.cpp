@@ -1,4 +1,4 @@
-#include "Camera.h"
+#include "camera/Camera.h"
 
 Camera::Camera(int screenWidth, int screenHeight)
     : x(0), y(0), screenWidth(screenWidth), screenHeight(screenHeight) {}

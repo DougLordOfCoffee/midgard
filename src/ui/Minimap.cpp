@@ -1,4 +1,4 @@
-#include "Minimap.h"
+#include "ui/Minimap.h"
 #include <stdio.h>
 #include <cctype>
 
@@ -33,9 +33,8 @@ Minimap::Minimap(const std::string& worldFile, SDL_Renderer* renderer) : minimap
     
     printf("Minimap initialized: %d x %d chunks\n", worldWidth, worldHeight);
     
-    // Generate minimap texture
-    SDL_Surface* surface = SDL_CreateRGBSurface(0, MINIMAP_SIZE, MINIMAP_SIZE, 32,
-                                                0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+    // Generate minimap texture (SDL3: SDL_CreateSurface with pixel format)
+    SDL_Surface* surface = SDL_CreateSurface(MINIMAP_SIZE, MINIMAP_SIZE, SDL_PIXELFORMAT_RGBA8888);
     if (!surface) {
         printf("Failed to create minimap surface\n");
         return;
@@ -54,17 +53,18 @@ Minimap::Minimap(const std::string& worldFile, SDL_Renderer* renderer) : minimap
             int pixX = (int)(x * scaleX);
             int pixY = (int)(y * scaleY);
             
-            // Fill a small rectangle for this chunk
+            // Fill a small rectangle for this chunk (SDL3: MapSurfaceRGBA, FillSurfaceRect)
             int w = (int)scaleX > 0 ? (int)scaleX : 1;
             int h = (int)scaleY > 0 ? (int)scaleY : 1;
             SDL_Rect pixelRect = {pixX, pixY, w, h};
-            SDL_FillRect(surface, &pixelRect, SDL_MapRGB(surface->format, color.r, color.g, color.b));
+            Uint32 pixel = SDL_MapSurfaceRGBA(surface, color.r, color.g, color.b, color.a);
+            SDL_FillSurfaceRect(surface, &pixelRect, pixel);
         }
     }
     
     // Convert surface to texture
     minimapTexture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
+    SDL_DestroySurface(surface);
     
     if (minimapTexture) {
         printf("Minimap texture created successfully\n");
@@ -91,17 +91,17 @@ SDL_Color Minimap::getBiomeColor(ChunkType biome) const {
 void Minimap::render(SDL_Renderer* renderer, int playerChunkX, int playerChunkY) {
     if (!minimapTexture) return;
     
-    // Draw minimap in top left
-    SDL_Rect minimapRect = {5, 5, MINIMAP_SIZE, MINIMAP_SIZE};
-    SDL_RenderCopy(renderer, minimapTexture, nullptr, &minimapRect);
+    // Draw minimap in top left (SDL3: use SDL_FRect)
+    SDL_FRect minimapRect = {5, 5, (float)MINIMAP_SIZE, (float)MINIMAP_SIZE};
+    SDL_RenderTexture(renderer, minimapTexture, nullptr, &minimapRect);
     
     // Draw black border around minimap
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderDrawRect(renderer, &minimapRect);
+    SDL_RenderRect(renderer, &minimapRect);
     
     // Draw thicker border
-    SDL_Rect borderRect = {4, 4, MINIMAP_SIZE + 2, MINIMAP_SIZE + 2};
-    SDL_RenderDrawRect(renderer, &borderRect);
+    SDL_FRect borderRect = {4, 4, (float)(MINIMAP_SIZE + 2), (float)(MINIMAP_SIZE + 2)};
+    SDL_RenderRect(renderer, &borderRect);
     
     // Draw player position indicator (yellow dot)
     float scaleX = (float)MINIMAP_SIZE / worldWidth;
@@ -111,13 +111,13 @@ void Minimap::render(SDL_Renderer* renderer, int playerChunkX, int playerChunkY)
     int playerPixY = 5 + (int)(playerChunkY * scaleY);
     
     SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);  // Yellow
-    SDL_Rect playerDot = {playerPixX - 2, playerPixY - 2, 4, 4};
+    SDL_FRect playerDot = {(float)(playerPixX - 2), (float)(playerPixY - 2), 4, 4};
     SDL_RenderFillRect(renderer, &playerDot);
     
     // Draw chunk coordinates display box below minimap
     SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
-    SDL_Rect coordBox = {5, MINIMAP_SIZE + 15, 150, 30};
-    SDL_RenderDrawRect(renderer, &coordBox);
+    SDL_FRect coordBox = {5, (float)(MINIMAP_SIZE + 15), 150, 30};
+    SDL_RenderRect(renderer, &coordBox);
     
     // Print chunk coordinates to console
     printf("Player at Chunk X: %d, Chunk Y: %d\n", playerChunkX, playerChunkY);

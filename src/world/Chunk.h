@@ -1,9 +1,9 @@
 #ifndef CHUNK_H
 #define CHUNK_H
 
-#include "Tile.h"
-#include "TextureManager.h"
-#include <SDL2/SDL.h>
+#include "world/Tile.h"
+#include "render/TextureManager.h"
+#include <SDL3/SDL.h>
 
 const int CHUNK_SIZE = 64;      // 64x64 tiles per chunk
 const int TILE_SIZE = 32;       // 32x32 pixels per tile

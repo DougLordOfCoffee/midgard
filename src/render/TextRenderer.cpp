@@ -1,4 +1,4 @@
-#include "TextRenderer.h"
+#include "render/TextRenderer.h"
 #include <stdio.h>
 
 TextRenderer::TextRenderer() : font(nullptr) {}
@@ -10,14 +10,14 @@ TextRenderer::~TextRenderer() {
 }
 
 bool TextRenderer::loadFont(const std::string& filePath, int fontSize) {
-    if (TTF_Init() == -1) {
-        printf("SDL_ttf initialization failed: %s\n", TTF_GetError());
+    if (!TTF_Init()) {
+        printf("SDL_ttf initialization failed: %s\n", SDL_GetError());
         return false;
     }
     
-    font = TTF_OpenFont(filePath.c_str(), fontSize);
+    font = TTF_OpenFont(filePath.c_str(), (float)fontSize);
     if (!font) {
-        printf("Failed to load font '%s': %s\n", filePath.c_str(), TTF_GetError());
+        printf("Failed to load font '%s': %s\n", filePath.c_str(), SDL_GetError());
         return false;
     }
     
@@ -32,28 +32,28 @@ void TextRenderer::renderText(SDL_Renderer* renderer, const std::string& text, i
     }
     
     // Render text to surface
-    SDL_Surface* textSurface = TTF_RenderText_Solid(font, text.c_str(), color);
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, text.c_str(), text.size(), color);
     if (!textSurface) {
-        printf("Failed to render text: %s\n", TTF_GetError());
+        printf("Failed to render text: %s\n", SDL_GetError());
         return;
     }
     
     // Convert surface to texture
     SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-    SDL_FreeSurface(textSurface);
+    SDL_DestroySurface(textSurface);
     
     if (!textTexture) {
         printf("Failed to create text texture\n");
         return;
     }
     
-    // Determine size
-    int w, h;
-    SDL_QueryTexture(textTexture, nullptr, nullptr, &w, &h);
+    // Determine size (SDL3: SDL_GetTextureSize)
+    float w, h;
+    SDL_GetTextureSize(textTexture, &w, &h);
     
-    // Render to screen
-    SDL_Rect dest = {x, y, w, h};
-    SDL_RenderCopy(renderer, textTexture, nullptr, &dest);
+    // Render to screen (SDL3: SDL_RenderTexture takes SDL_FRect)
+    SDL_FRect dest = {(float)x, (float)y, w, h};
+    SDL_RenderTexture(renderer, textTexture, nullptr, &dest);
     
     // Clean up
     SDL_DestroyTexture(textTexture);

@@ -1,9 +1,9 @@
 #ifndef TILEMAP_H
 #define TILEMAP_H
 
-#include "Chunk.h"
-#include "WorldLoader.h"
-#include "TextureManager.h"
+#include "world/Chunk.h"
+#include "world/WorldLoader.h"
+#include "render/TextureManager.h"
 #include <map>
 
 class TileMap {

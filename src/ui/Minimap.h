@@ -1,8 +1,8 @@
 #ifndef MINIMAP_H
 #define MINIMAP_H
 
-#include <SDL2/SDL.h>
-#include "WorldLoader.h"
+#include <SDL3/SDL.h>
+#include "world/WorldLoader.h"
 #include <string>
 
 class Minimap {

@@ -1,4 +1,4 @@
-#include "NoiseGenerator.h"
+#include "world/NoiseGenerator.h"
 
 NoiseGenerator::NoiseGenerator(int seed) : seed(seed) {
     generator.seed(seed);

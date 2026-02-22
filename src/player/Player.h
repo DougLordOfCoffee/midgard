@@ -1,14 +1,14 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 class Player {
 public:
     Player(int x, int y, int width, int height);
     
-    void handleInput(const Uint8* keys);
-    void handleControllerInput(SDL_GameController* controller);
+    void handleInput(const bool* keys);
+    void handleControllerInput(SDL_Gamepad* gamepad);
     void render(SDL_Renderer* renderer, int cameraX, int cameraY);
     
     SDL_Rect getRect() const;

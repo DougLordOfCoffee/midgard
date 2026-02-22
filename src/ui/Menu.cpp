@@ -1,7 +1,28 @@
-#include "Menu.h"
+#include "ui/Menu.h"
+#include "event_bus/EventBus.h"
 #include <stdio.h>
 
-Menu::Menu() : open(false), selectedOption(0), optionSelected(false) {}
+Menu::Menu() : open(false), selectedOption(0) {}
+
+void Menu::init(EventBus& bus) {
+    bus.subscribeKeyDown([this, &bus](SDL_Keycode key, bool repeat) {
+        if (repeat) return;
+        if (key == SDLK_ESCAPE) {
+            toggle();
+            return;
+        }
+        if (!open) return;
+        if (key == SDLK_UP) {
+            selectedOption--;
+            if (selectedOption < 0) selectedOption = NUM_OPTIONS - 1;
+        } else if (key == SDLK_DOWN) {
+            selectedOption++;
+            if (selectedOption >= NUM_OPTIONS) selectedOption = 0;
+        } else if (key == SDLK_RETURN || key == SDLK_KP_ENTER) {
+            bus.publishMenuOptionSelected((MenuOption)selectedOption);
+        }
+    });
+}
 
 bool Menu::isOpen() const {
     return open;
@@ -10,46 +31,6 @@ bool Menu::isOpen() const {
 void Menu::toggle() {
     open = !open;
     selectedOption = 0;
-    optionSelected = false;
-}
-
-void Menu::handleInput(const Uint8* keys) {
-    static bool upPressed = false;
-    static bool downPressed = false;
-    static bool enterPressed = false;
-    
-    // Up arrow - previous option
-    if (keys[SDL_SCANCODE_UP] && !upPressed) {
-        selectedOption--;
-        if (selectedOption < 0) {
-            selectedOption = NUM_OPTIONS - 1;
-        }
-        upPressed = true;
-    }
-    if (!keys[SDL_SCANCODE_UP]) {
-        upPressed = false;
-    }
-    
-    // Down arrow - next option
-    if (keys[SDL_SCANCODE_DOWN] && !downPressed) {
-        selectedOption++;
-        if (selectedOption >= NUM_OPTIONS) {
-            selectedOption = 0;
-        }
-        downPressed = true;
-    }
-    if (!keys[SDL_SCANCODE_DOWN]) {
-        downPressed = false;
-    }
-    
-    // Enter - select option
-    if (keys[SDL_SCANCODE_RETURN] && !enterPressed) {
-        optionSelected = true;
-        enterPressed = true;
-    }
-    if (!keys[SDL_SCANCODE_RETURN]) {
-        enterPressed = false;
-    }
 }
 
 SDL_Color Menu::getOptionColor(int option) const {
@@ -62,21 +43,21 @@ SDL_Color Menu::getOptionColor(int option) const {
 void Menu::render(SDL_Renderer* renderer, TextRenderer* textRenderer, int windowWidth, int windowHeight) {
     if (!open) return;
     
-    // Draw semi-transparent overlay
+    // Draw semi-transparent overlay (SDL3: use SDL_FRect)
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 200);  // Black with transparency
-    SDL_Rect overlay = {0, 0, windowWidth, windowHeight};
+    SDL_FRect overlay = {0, 0, (float)windowWidth, (float)windowHeight};
     SDL_RenderFillRect(renderer, &overlay);
     
     // Draw menu box in center
     int menuX = (windowWidth - MENU_WIDTH) / 2;
     int menuY = (windowHeight - (NUM_OPTIONS * OPTION_HEIGHT)) / 2;
     
-    SDL_Rect menuBox = {menuX - 10, menuY - 30, MENU_WIDTH + 20, (NUM_OPTIONS * OPTION_HEIGHT) + 60};
+    SDL_FRect menuBox = {(float)(menuX - 10), (float)(menuY - 30), (float)(MENU_WIDTH + 20), (float)((NUM_OPTIONS * OPTION_HEIGHT) + 60)};
     SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);  // Dark gray
     SDL_RenderFillRect(renderer, &menuBox);
     SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
-    SDL_RenderDrawRect(renderer, &menuBox);
+    SDL_RenderRect(renderer, &menuBox);
     
     // Draw title
     if (textRenderer) {
@@ -87,7 +68,7 @@ void Menu::render(SDL_Renderer* renderer, TextRenderer* textRenderer, int window
     const char* optionNames[] = {"Resume", "Fullscreen", "Exit"};
     
     for (int i = 0; i < NUM_OPTIONS; i++) {
-        SDL_Rect optionRect = {menuX, menuY + (i * OPTION_HEIGHT), MENU_WIDTH, OPTION_HEIGHT - 5};
+        SDL_FRect optionRect = {(float)menuX, (float)(menuY + (i * OPTION_HEIGHT)), (float)MENU_WIDTH, (float)(OPTION_HEIGHT - 5)};
         
         // Draw option background
         SDL_Color color = getOptionColor(i);
@@ -96,7 +77,7 @@ void Menu::render(SDL_Renderer* renderer, TextRenderer* textRenderer, int window
         
         // Draw option border
         SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
-        SDL_RenderDrawRect(renderer, &optionRect);
+        SDL_RenderRect(renderer, &optionRect);
         
         // Draw option text
         if (textRenderer) {
@@ -105,12 +86,4 @@ void Menu::render(SDL_Renderer* renderer, TextRenderer* textRenderer, int window
     }
     
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
-}
-
-MenuOption Menu::getSelectedOption() const {
-    return (MenuOption)selectedOption;
-}
-
-bool Menu::wasOptionSelected() const {
-    return optionSelected;
 }

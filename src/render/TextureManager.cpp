@@ -1,4 +1,4 @@
-#include "TextureManager.h"
+#include "render/TextureManager.h"
 #include <stdio.h>
 
 TextureManager::TextureManager() {}
@@ -17,13 +17,13 @@ bool TextureManager::loadTexture(const std::string& name, const std::string& fil
     // Load image from file
     SDL_Surface* surface = IMG_Load(filePath.c_str());
     if (!surface) {
-        printf("Failed to load image '%s': %s\n", filePath.c_str(), IMG_GetError());
+        printf("Failed to load image '%s': %s\n", filePath.c_str(), SDL_GetError());
         return false;
     }
     
     // Convert surface to texture
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
+    SDL_DestroySurface(surface);
     
     if (!texture) {
         printf("Failed to create texture from '%s': %s\n", filePath.c_str(), SDL_GetError());
@@ -48,6 +48,6 @@ void TextureManager::drawTexture(SDL_Renderer* renderer, const std::string& name
     SDL_Texture* texture = getTexture(name);
     if (!texture) return;
     
-    SDL_Rect dest = {x, y, width, height};
-    SDL_RenderCopy(renderer, texture, nullptr, &dest);
+    SDL_FRect dest = {(float)x, (float)y, (float)width, (float)height};
+    SDL_RenderTexture(renderer, texture, nullptr, &dest);
 }

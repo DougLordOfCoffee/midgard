@@ -1,5 +1,5 @@
-#include "Chunk.h"
-#include "WorldLoader.h"
+#include "world/Chunk.h"
+#include "world/WorldLoader.h"
 
 Chunk::Chunk(int chunkX, int chunkY, ChunkType biomeType) : chunkX(chunkX), chunkY(chunkY) {
     generateFromBiome(biomeType);
@@ -78,18 +78,18 @@ void Chunk::render(SDL_Renderer* renderer, int cameraX, int cameraY, int viewWid
                 textureManager.drawTexture(renderer, tile.textureName, screenX, screenY, TILE_SIZE, TILE_SIZE);
             } else {
                 // No texture found - render solid color as fallback
-                SDL_Rect tileRect = { screenX, screenY, TILE_SIZE, TILE_SIZE };
+                SDL_FRect tileRect = { (float)screenX, (float)screenY, (float)TILE_SIZE, (float)TILE_SIZE };
                 SDL_Color color = tile.getColor();
                 SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
                 SDL_RenderFillRect(renderer, &tileRect);
                 
                 // Draw tile border in darker color so you can see individual tiles
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);  // Black border
-                SDL_RenderDrawRect(renderer, &tileRect);
+                SDL_RenderRect(renderer, &tileRect);
                 
                 // Draw a thick border so fallback tiles are obvious
-                SDL_Rect borderRect = { screenX + 1, screenY + 1, TILE_SIZE - 2, TILE_SIZE - 2 };
-                SDL_RenderDrawRect(renderer, &borderRect);
+                SDL_FRect borderRect = { (float)(screenX + 1), (float)(screenY + 1), (float)(TILE_SIZE - 2), (float)(TILE_SIZE - 2) };
+                SDL_RenderRect(renderer, &borderRect);
             }
         }
     }
