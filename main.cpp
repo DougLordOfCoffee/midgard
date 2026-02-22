@@ -3,11 +3,12 @@
 #include "Player.h"
 #include "Camera.h"
 #include "Layer.h"
+#include "TileMap.h"
 
 int main(int argc, char* argv[]) {
 
-    // Start up SDL (video is all we need for now)
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    // Start up SDL (video and gamepad support)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) != 0) {
         printf("SDL_Init Error: %s\n", SDL_GetError());
         return 1;
     }
@@ -42,12 +43,22 @@ int main(int argc, char* argv[]) {
 
     // Create camera and player
     Camera camera(1080, 540);
-    Player player(350, 250, 100, 100);
+    Player player(512, 512, 32, 32);  // Start player in middle-ish of world
     
-    // Create background layers with parallax effect
-    // parallaxFactor: 1.0 = completely static, 0.0 = moves with camera
-    Layer backgroundFar(0, 0, 1200, 540, {50, 80, 150, 255}, 1.0f);      // Sky - fully static
-    Layer backgroundNear(0, 200, 1200, 340, {34, 139, 34, 255}, 0.8f);   // Ground hills - slight parallax
+    // Create 100x100 chunk world (use your own dimensions here!)
+    TileMap tilemap(3, 3);
+    
+    // Try to open a controller if one is connected
+    SDL_GameController* controller = nullptr;
+    for (int i = 0; i < SDL_NumJoysticks(); i++) {
+        if (SDL_IsGameController(i)) {
+            controller = SDL_GameControllerOpen(i);
+            if (controller) {
+                printf("Controller found! Using gamepad input.\n");
+                break;
+            }
+        }
+    }
     
     int cameraTarget = 0;  // 0 = player, 1 = fixed world editing mode
 
@@ -72,6 +83,11 @@ int main(int argc, char* argv[]) {
         const Uint8* keys = SDL_GetKeyboardState(NULL);
         player.handleInput(keys);
         
+        // Handle controller input if available
+        if (controller) {
+            player.handleControllerInput(controller);
+        }
+        
         // Update camera based on mode
         if (cameraTarget == 0) {
             // Follow player
@@ -82,9 +98,8 @@ int main(int argc, char* argv[]) {
         SDL_SetRenderDrawColor(renderer, 20, 20, 40, 255);
         SDL_RenderClear(renderer);
 
-        // Render background layers with parallax
-        backgroundFar.render(renderer, camera.getX(), camera.getY());
-        backgroundNear.render(renderer, camera.getX(), camera.getY());
+        // Render tilemap
+        tilemap.render(renderer, camera.getX(), camera.getY(), 1080, 540);
         
         // Render player with camera offset
         player.render(renderer, camera.getX(), camera.getY());
@@ -92,6 +107,9 @@ int main(int argc, char* argv[]) {
         SDL_RenderPresent(renderer);
     }
     // Clean up
+    if (controller) {
+        SDL_GameControllerClose(controller);
+    }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
