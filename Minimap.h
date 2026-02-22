@@ -15,7 +15,7 @@ public:
 private:
     SDL_Texture* minimapTexture;
     int worldWidth, worldHeight;
-    const int MINIMAP_SIZE = 100;  // 100x100 pixels
+    const int MINIMAP_SIZE = 200;  // 100x100 pixels
     
     SDL_Color getBiomeColor(ChunkType biome) const;
 };

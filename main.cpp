@@ -172,7 +172,11 @@ int main(int argc, char* argv[]) {
                     // Update camera viewport
                     camera.setViewportSize(windowWidth, windowHeight);
                     printf("Fullscreen: %s, Window size: %d x %d\n", fullscreen ? "ON" : "OFF", windowWidth, windowHeight);
+                } else if (selected == MenuOption::RESUME) {
+                    // Just close the menu
+                    menu.toggle();
                 }
+                
             }
         } else {
             // Only handle player input when menu is closed

@@ -111,6 +111,10 @@ MenuOption Menu::getSelectedOption() const {
     return (MenuOption)selectedOption;
 }
 
-bool Menu::wasOptionSelected() const {
-    return optionSelected;
+bool Menu::wasOptionSelected() {
+    if (optionSelected) {
+        optionSelected = false; // Reset the "doorbell"
+        return true;
+    }
+    return false;
 }

@@ -20,7 +20,7 @@ public:
     void render(SDL_Renderer* renderer, TextRenderer* textRenderer, int windowWidth, int windowHeight);
     
     MenuOption getSelectedOption() const;
-    bool wasOptionSelected() const;
+    bool wasOptionSelected(); // Remove the 'const'
     
 private:
     bool open;

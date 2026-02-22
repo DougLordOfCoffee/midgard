@@ -54,9 +54,10 @@ Minimap::Minimap(const std::string& worldFile, SDL_Renderer* renderer) : minimap
             int pixX = (int)(x * scaleX);
             int pixY = (int)(y * scaleY);
             
-            // Fill a small rectangle for this chunk
-            int w = (int)scaleX > 0 ? (int)scaleX : 1;
-            int h = (int)scaleY > 0 ? (int)scaleY : 1;
+
+
+            int w = (int)scaleX + 1;
+            int h = (int)scaleY + 1;
             SDL_Rect pixelRect = {pixX, pixY, w, h};
             SDL_FillRect(surface, &pixelRect, SDL_MapRGB(surface->format, color.r, color.g, color.b));
         }
