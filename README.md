@@ -3,6 +3,8 @@ TODO:
 
 
 PLAYER BASED CHANGES:
+- seperate player from the fucking main lol
+- controler movement and slower speed
 - Player colides with screen (this wont be necessary after we get the cameras set up, still good to do.)
 - player can change color via user interface (framework for abilities)
 
