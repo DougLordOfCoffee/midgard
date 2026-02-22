@@ -9,7 +9,7 @@ SET "PATH=%MINGW64%/bin;%PATH%"
 :: --- COMPILATION ---
 echo Building Midgard...
 
-g++ -std=c++17 -Isrc src/game/*.cpp src/camera/*.cpp src/player/*.cpp src/world/*.cpp src/render/*.cpp src/ui/*.cpp src/event_bus/*.cpp -o game.exe ^
+g++ -std=c++17 -Isrc src/game/*.cpp src/camera/*.cpp src/player/*.cpp src/config/*.cpp src/world/*.cpp src/render/*.cpp src/ui/*.cpp src/event_bus/*.cpp -o game.exe ^
 -I"%INC%" -L"%LIB%" ^
 -lmingw32 -lSDL3 -lSDL3_image -lSDL3_ttf ^
 -mwindows

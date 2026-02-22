@@ -12,6 +12,7 @@ public:
     using KeyDownCallback = std::function<void(SDL_Keycode key, bool repeat)>;
     using KeyboardStateCallback = std::function<void(const bool* keys)>;
     using GamepadStateCallback = std::function<void(SDL_Gamepad* gamepad)>;
+    using GamepadButtonDownCallback = std::function<void(Uint8 button)>;
     using MenuOptionSelectedCallback = std::function<void(MenuOption option)>;
 
     void subscribeQuitRequested(QuitCallback cb);
@@ -26,6 +27,9 @@ public:
     void subscribeGamepadState(GamepadStateCallback cb);
     void publishGamepadState(SDL_Gamepad* gamepad);
 
+    void subscribeGamepadButtonDown(GamepadButtonDownCallback cb);
+    void publishGamepadButtonDown(Uint8 button);
+
     void subscribeMenuOptionSelected(MenuOptionSelectedCallback cb);
     void publishMenuOptionSelected(MenuOption option);
 
@@ -34,6 +38,7 @@ private:
     std::vector<KeyDownCallback> keyDownSubscribers;
     std::vector<KeyboardStateCallback> keyboardStateSubscribers;
     std::vector<GamepadStateCallback> gamepadStateSubscribers;
+    std::vector<GamepadButtonDownCallback> gamepadButtonDownSubscribers;
     std::vector<MenuOptionSelectedCallback> menuOptionSelectedSubscribers;
 };
 

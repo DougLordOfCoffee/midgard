@@ -2,7 +2,7 @@
 #include "event_bus/EventBus.h"
 #include <stdio.h>
 
-Menu::Menu() : open(false), selectedOption(0) {}
+Menu::Menu() : open(false), selectedOption(0), lastMenuUp(false), lastMenuDown(false) {}
 
 void Menu::init(EventBus& bus) {
     bus.subscribeKeyDown([this, &bus](SDL_Keycode key, bool repeat) {
@@ -13,14 +13,25 @@ void Menu::init(EventBus& bus) {
         }
         if (!open) return;
         if (key == SDLK_UP) {
-            selectedOption--;
-            if (selectedOption < 0) selectedOption = NUM_OPTIONS - 1;
+            moveSelectionUp();
         } else if (key == SDLK_DOWN) {
-            selectedOption++;
-            if (selectedOption >= NUM_OPTIONS) selectedOption = 0;
+            moveSelectionDown();
         } else if (key == SDLK_RETURN || key == SDLK_KP_ENTER) {
             bus.publishMenuOptionSelected((MenuOption)selectedOption);
         }
+    });
+    bus.subscribeGamepadButtonDown([this, &bus](Uint8 button) {
+        if (button == SDL_GAMEPAD_BUTTON_START || button == SDL_GAMEPAD_BUTTON_EAST) {
+            toggle();
+            return;
+        }
+        if (!open) return;
+        if (button == SDL_GAMEPAD_BUTTON_SOUTH) {
+            bus.publishMenuOptionSelected((MenuOption)selectedOption);
+        }
+    });
+    bus.subscribeGamepadState([this](SDL_Gamepad* gp) {
+        if (open && gp) handleGamepadState(gp);
     });
 }
 
@@ -31,6 +42,32 @@ bool Menu::isOpen() const {
 void Menu::toggle() {
     open = !open;
     selectedOption = 0;
+}
+
+void Menu::moveSelectionUp() {
+    selectedOption--;
+    if (selectedOption < 0) selectedOption = NUM_OPTIONS - 1;
+}
+
+void Menu::moveSelectionDown() {
+    selectedOption++;
+    if (selectedOption >= NUM_OPTIONS) selectedOption = 0;
+}
+
+void Menu::handleGamepadState(SDL_Gamepad* gamepad) {
+    if (!gamepad) return;
+    const int STICK_DEADZONE = 8000;
+    bool dpadUp = SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_DPAD_UP) != 0;
+    bool dpadDown = SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_DPAD_DOWN) != 0;
+    Sint16 stickY = SDL_GetGamepadAxis(gamepad, SDL_GAMEPAD_AXIS_LEFTY);
+    bool stickUp = (stickY < -STICK_DEADZONE);
+    bool stickDown = (stickY > STICK_DEADZONE);
+    bool up = dpadUp || stickUp;
+    bool down = dpadDown || stickDown;
+    if (up && !lastMenuUp) moveSelectionUp();
+    lastMenuUp = up;
+    if (down && !lastMenuDown) moveSelectionDown();
+    lastMenuDown = down;
 }
 
 SDL_Color Menu::getOptionColor(int option) const {

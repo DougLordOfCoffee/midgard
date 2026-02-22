@@ -1,0 +1,2 @@
+player_max_speed=600
+player_angular_speed=3.0

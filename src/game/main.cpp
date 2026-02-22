@@ -14,6 +14,7 @@
 #include "ui/Minimap.h"
 #include "ui/Menu.h"
 #include "event_bus/EventBus.h"
+#include "config/GameConfig.h"
 
 int main(int argc, char* argv[]) {
 
@@ -87,9 +88,12 @@ int main(int argc, char* argv[]) {
     int centerWorldX = (worldWidth * 64 * 32) / 2;  // chunks * tiles_per_chunk * pixels_per_tile
     int centerWorldY = (worldHeight * 64 * 32) / 2;
     
+    GameConfig config = GameConfig::load("config.txt");
+    
     // Create camera and player at world center
     Camera camera(1080, 540);
-    Player player(centerWorldX - 16, centerWorldY - 16, 32, 32);  // -16 to center the 32x32 player
+    Player player((float)(centerWorldX - 16), (float)(centerWorldY - 16), 32, 32,
+                  config.playerMaxSpeed, config.playerAngularSpeed);
     
     printf("World dimensions: %d x %d chunks\n", worldWidth, worldHeight);
     printf("Player spawned at: (%d, %d)\n", centerWorldX, centerWorldY);
@@ -123,6 +127,9 @@ int main(int argc, char* argv[]) {
 
     int running = 1;
     SDL_Event event;
+
+    Uint64 lastTime = SDL_GetPerformanceCounter();
+    const float MAX_DT = 0.1f;
 
     // Event bus subscriptions
     bus.subscribeQuitRequested([&running]() { running = 0; });
@@ -159,12 +166,21 @@ int main(int argc, char* argv[]) {
             if (event.type == SDL_EVENT_KEY_DOWN) {
                 bus.publishKeyDown(event.key.key, event.key.repeat);
             }
+            if (event.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN) {
+                bus.publishGamepadButtonDown(event.gbutton.button);
+            }
         }
 
         // Check which keys are being held down RIGHT NOW (SDL3: returns const bool*)
         const bool* keys = SDL_GetKeyboardState(NULL);
         bus.publishKeyboardState(keys);
         bus.publishGamepadState(gamepad);
+        
+        Uint64 now = SDL_GetPerformanceCounter();
+        float dt = (float)(now - lastTime) / (float)SDL_GetPerformanceFrequency();
+        lastTime = now;
+        if (dt > MAX_DT) dt = MAX_DT;
+        if (!menu.isOpen()) player.update(dt);
         
         // Update camera based on mode (when menu closed)
         if (cameraTarget == 0 && !menu.isOpen()) {
@@ -192,7 +208,7 @@ int main(int argc, char* argv[]) {
             int playerChunkY = (player.getCenterY()) / (64 * 32);
             
             // Render minimap with player position
-            minimap.render(renderer, playerChunkX, playerChunkY);
+            minimap.render(renderer, playerChunkX, playerChunkY, &textRenderer);
         }
         
         // Render menu on top of everything

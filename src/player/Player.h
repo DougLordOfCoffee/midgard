@@ -5,19 +5,26 @@
 
 class Player {
 public:
-    Player(int x, int y, int width, int height);
-    
+    Player(float x, float y, int width, int height, float maxSpeed, float angularSpeed);
+
     void handleInput(const bool* keys);
     void handleControllerInput(SDL_Gamepad* gamepad);
+    void update(float dt);
     void render(SDL_Renderer* renderer, int cameraX, int cameraY);
-    
+
     SDL_Rect getRect() const;
     int getCenterX() const;
     int getCenterY() const;
-    
+
 private:
-    SDL_Rect rect;
-    int speed;
+    float x, y;
+    int w, h;
+    float maxSpeed;
+    float angularSpeed;
+    float angle;
+
+    float moveX, moveY;
+    float turn;
 };
 
 #endif

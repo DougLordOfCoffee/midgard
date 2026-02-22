@@ -3,6 +3,7 @@
 
 #include <SDL3/SDL.h>
 #include "world/WorldLoader.h"
+#include "render/TextRenderer.h"
 #include <string>
 
 class Minimap {
@@ -10,12 +11,12 @@ public:
     Minimap(const std::string& worldFile, SDL_Renderer* renderer);
     ~Minimap();
     
-    void render(SDL_Renderer* renderer, int playerChunkX, int playerChunkY);
+    void render(SDL_Renderer* renderer, int playerChunkX, int playerChunkY, TextRenderer* textRenderer = nullptr);
     
 private:
     SDL_Texture* minimapTexture;
     int worldWidth, worldHeight;
-    const int MINIMAP_SIZE = 100;  // 100x100 pixels
+    const int MINIMAP_SIZE = 200;  // 200x200 pixels
     
     SDL_Color getBiomeColor(ChunkType biome) const;
 };

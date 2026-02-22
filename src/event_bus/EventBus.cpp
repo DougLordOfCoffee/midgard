@@ -40,6 +40,16 @@ void EventBus::publishGamepadState(SDL_Gamepad* gamepad) {
     }
 }
 
+void EventBus::subscribeGamepadButtonDown(GamepadButtonDownCallback cb) {
+    gamepadButtonDownSubscribers.push_back(std::move(cb));
+}
+
+void EventBus::publishGamepadButtonDown(Uint8 button) {
+    for (auto& cb : gamepadButtonDownSubscribers) {
+        cb(button);
+    }
+}
+
 void EventBus::subscribeMenuOptionSelected(MenuOptionSelectedCallback cb) {
     menuOptionSelectedSubscribers.push_back(std::move(cb));
 }
