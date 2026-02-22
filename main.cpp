@@ -1,6 +1,8 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include "Player.h"
+#include "Camera.h"
+#include "Layer.h"
 
 int main(int argc, char* argv[]) {
 
@@ -38,8 +40,16 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Our player
+    // Create camera and player
+    Camera camera(1080, 540);
     Player player(350, 250, 100, 100);
+    
+    // Create background layers with parallax effect
+    // parallaxFactor: 1.0 = completely static, 0.0 = moves with camera
+    Layer backgroundFar(0, 0, 1200, 540, {50, 80, 150, 255}, 1.0f);      // Sky - fully static
+    Layer backgroundNear(0, 200, 1200, 340, {34, 139, 34, 255}, 0.8f);   // Ground hills - slight parallax
+    
+    int cameraTarget = 0;  // 0 = player, 1 = fixed world editing mode
 
     int running = 1;
     SDL_Event event;
@@ -50,16 +60,34 @@ int main(int argc, char* argv[]) {
             if (event.type == SDL_QUIT) {
                 running = 0;
             }
+            if (event.type == SDL_KEYDOWN) {
+                if (event.key.keysym.sym == SDLK_TAB) {
+                    // Toggle camera mode
+                    cameraTarget = (cameraTarget == 0) ? 1 : 0;
+                }
+            }
         }
 
         // Check which keys are being held down RIGHT NOW
         const Uint8* keys = SDL_GetKeyboardState(NULL);
         player.handleInput(keys);
+        
+        // Update camera based on mode
+        if (cameraTarget == 0) {
+            // Follow player
+            camera.followTarget(player.getCenterX(), player.getCenterY());
+        }
+        // In mode 1, camera stays static for world editing
 
         SDL_SetRenderDrawColor(renderer, 20, 20, 40, 255);
         SDL_RenderClear(renderer);
 
-        player.render(renderer);
+        // Render background layers with parallax
+        backgroundFar.render(renderer, camera.getX(), camera.getY());
+        backgroundNear.render(renderer, camera.getX(), camera.getY());
+        
+        // Render player with camera offset
+        player.render(renderer, camera.getX(), camera.getY());
 
         SDL_RenderPresent(renderer);
     }

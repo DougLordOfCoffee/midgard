@@ -12,11 +12,23 @@ void Player::handleInput(const Uint8* keys) {
     if (keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT]) rect.x += speed;
 }
 
-void Player::render(SDL_Renderer* renderer) {
+void Player::render(SDL_Renderer* renderer, int cameraX, int cameraY) {
+    SDL_Rect renderRect = rect;
+    renderRect.x -= cameraX;
+    renderRect.y -= cameraY;
+    
     SDL_SetRenderDrawColor(renderer, 0, 255, 100, 255);
-    SDL_RenderFillRect(renderer, &rect);
+    SDL_RenderFillRect(renderer, &renderRect);
 }
 
 SDL_Rect Player::getRect() const {
     return rect;
+}
+
+int Player::getCenterX() const {
+    return rect.x + rect.w / 2;
+}
+
+int Player::getCenterY() const {
+    return rect.y + rect.h / 2;
 }
