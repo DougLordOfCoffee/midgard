@@ -1,32 +1,19 @@
 #include "Chunk.h"
+#include "WorldLoader.h"
 
-Chunk::Chunk(int chunkX, int chunkY, NoiseGenerator& noise) : chunkX(chunkX), chunkY(chunkY) {
-    generateDefault(noise);
+Chunk::Chunk(int chunkX, int chunkY, ChunkType biomeType) : chunkX(chunkX), chunkY(chunkY) {
+    generateFromBiome(biomeType);
 }
 
-void Chunk::generateDefault(NoiseGenerator& noise) {
-    // Generate terrain based on noise
+void Chunk::generateFromBiome(ChunkType biomeType) {
+    // Fill ALL tiles in chunk with the same biome type
+    TileType tileType = WorldLoader::getTileTypeForBiome(biomeType);
+    std::string textureName = WorldLoader::getTextureNameForBiome(biomeType);
+    
     for (int y = 0; y < CHUNK_SIZE; y++) {
         for (int x = 0; x < CHUNK_SIZE; x++) {
-            // Get world coordinates
-            int worldX = chunkX * CHUNK_SIZE + x;
-            int worldY = chunkY * CHUNK_SIZE + y;
-            
-            // Get noise value (0.0 to 1.0)
-            float noiseValue = noise.getNoise(worldX, worldY);
-            
-            // Determine tile type based on noise
-            if (noiseValue < 0.3f) {
-                tiles[x][y] = Tile(TileType::WATER);
-            } else if (noiseValue < 0.4f) {
-                tiles[x][y] = Tile(TileType::GRASS);
-            } else if (noiseValue < 0.7f) {
-                tiles[x][y] = Tile(TileType::GRASS);
-            } else if (noiseValue < 0.85f) {
-                tiles[x][y] = Tile(TileType::WALL);
-            } else {
-                tiles[x][y] = Tile(TileType::TRAP);
-            }
+            tiles[x][y] = Tile(tileType);
+            tiles[x][y].textureName = textureName;
         }
     }
 }
@@ -44,12 +31,24 @@ Tile Chunk::getTile(int x, int y) const {
     return Tile(TileType::EMPTY);
 }
 
-void Chunk::render(SDL_Renderer* renderer, int cameraX, int cameraY, int viewWidth, int viewHeight) {
-    // Calculate which tiles are visible on screen
-    int startTileX = cameraX / TILE_SIZE;
-    int startTileY = cameraY / TILE_SIZE;
-    int endTileX = (cameraX + viewWidth) / TILE_SIZE + 1;
-    int endTileY = (cameraY + viewHeight) / TILE_SIZE + 1;
+void Chunk::render(SDL_Renderer* renderer, int cameraX, int cameraY, int viewWidth, int viewHeight, TextureManager& textureManager) {
+    // Get this chunk's world position in tiles
+    int chunkWorldTileX = chunkX * CHUNK_SIZE;
+    int chunkWorldTileY = chunkY * CHUNK_SIZE;
+    int chunkWorldPixelX = chunkWorldTileX * TILE_SIZE;
+    int chunkWorldPixelY = chunkWorldTileY * TILE_SIZE;
+    
+    // Calculate which world tiles are visible on screen
+    int startWorldTileX = cameraX / TILE_SIZE;
+    int startWorldTileY = cameraY / TILE_SIZE;
+    int endWorldTileX = (cameraX + viewWidth) / TILE_SIZE + 1;
+    int endWorldTileY = (cameraY + viewHeight) / TILE_SIZE + 1;
+    
+    // Convert to local chunk coordinates
+    int startTileX = startWorldTileX - chunkWorldTileX;
+    int startTileY = startWorldTileY - chunkWorldTileY;
+    int endTileX = endWorldTileX - chunkWorldTileX;
+    int endTileY = endWorldTileY - chunkWorldTileY;
     
     // Clamp to chunk bounds
     startTileX = (startTileX < 0) ? 0 : startTileX;
@@ -64,20 +63,34 @@ void Chunk::render(SDL_Renderer* renderer, int cameraX, int cameraY, int viewWid
             
             if (tile.type == TileType::EMPTY) continue;
             
-            SDL_Rect tileRect = {
-                x * TILE_SIZE - cameraX,
-                y * TILE_SIZE - cameraY,
-                TILE_SIZE,
-                TILE_SIZE
-            };
+            // Calculate world pixel position of this tile
+            int worldPixelX = (chunkWorldTileX + x) * TILE_SIZE;
+            int worldPixelY = (chunkWorldTileY + y) * TILE_SIZE;
             
-            SDL_Color color = tile.getColor();
-            SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-            SDL_RenderFillRect(renderer, &tileRect);
+            // Convert to screen position (relative to camera)
+            int screenX = worldPixelX - cameraX;
+            int screenY = worldPixelY - cameraY;
             
-            // Draw tile border for visibility
-            SDL_SetRenderDrawColor(renderer, color.r / 2, color.g / 2, color.b / 2, 255);
-            SDL_RenderDrawRect(renderer, &tileRect);
+            // Try to render texture, fall back to color if texture not found
+            SDL_Texture* texture = textureManager.getTexture(tile.textureName);
+            if (texture) {
+                // Texture found - render it
+                textureManager.drawTexture(renderer, tile.textureName, screenX, screenY, TILE_SIZE, TILE_SIZE);
+            } else {
+                // No texture found - render solid color as fallback
+                SDL_Rect tileRect = { screenX, screenY, TILE_SIZE, TILE_SIZE };
+                SDL_Color color = tile.getColor();
+                SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+                SDL_RenderFillRect(renderer, &tileRect);
+                
+                // Draw tile border in darker color so you can see individual tiles
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);  // Black border
+                SDL_RenderDrawRect(renderer, &tileRect);
+                
+                // Draw a thick border so fallback tiles are obvious
+                SDL_Rect borderRect = { screenX + 1, screenY + 1, TILE_SIZE - 2, TILE_SIZE - 2 };
+                SDL_RenderDrawRect(renderer, &borderRect);
+            }
         }
     }
 }

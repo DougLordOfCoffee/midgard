@@ -2,6 +2,7 @@
 #define TILE_H
 
 #include <SDL2/SDL.h>
+#include <string>
 
 enum class TileType {
     EMPTY = 0,
@@ -14,9 +15,21 @@ enum class TileType {
 
 struct Tile {
     TileType type;
+    std::string textureName;  // Name of the texture file for this tile
     
-    Tile() : type(TileType::EMPTY) {}
-    Tile(TileType t) : type(t) {}
+    Tile() : type(TileType::EMPTY), textureName("") {}
+    Tile(TileType t) : type(t), textureName(getTextureNameForType(t)) {}
+    
+    static std::string getTextureNameForType(TileType t) {
+        switch (t) {
+            case TileType::GROUND: return "ground";
+            case TileType::WALL: return "wall";
+            case TileType::WATER: return "water";
+            case TileType::GRASS: return "grass";
+            case TileType::TRAP: return "trap";
+            default: return "";
+        }
+    }
     
     SDL_Color getColor() const {
         switch (type) {

@@ -4,7 +4,14 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "D:/SDL2-2.32.6/i686-w64-mingw32/include"
+                "D:/SDL2-2.32.6/i686-w64-mingw32/include/**",
+                "D:/SDL2-2.32.6/i686-w64-mingw32/lib/**",
+                "D:/SDL2-2.32.6/i686-w64-mingw32/bin/**",
+                "D:/SDL2_image-2.0.5/x86_64-w64-mingw32/include/**",
+                "D:/SDL2_image-2.0.5/x86_64-w64-mingw32/lib/**",
+                "D:/SDL2_ttf-2.22.0/i686-w64-mingw32/include/**",
+                "D:/SDL2_ttf-2.22.0/i686-w64-mingw32/lib/**"
+
             ],
             "defines": [
                 "_DEBUG",

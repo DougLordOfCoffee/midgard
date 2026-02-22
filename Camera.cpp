@@ -14,12 +14,25 @@ void Camera::setPosition(int posX, int posY) {
     y = posY;
 }
 
+void Camera::setViewportSize(int width, int height) {
+    screenWidth = width;
+    screenHeight = height;
+}
+
 int Camera::getX() const {
     return x;
 }
 
 int Camera::getY() const {
     return y;
+}
+
+int Camera::getWidth() const {
+    return screenWidth;
+}
+
+int Camera::getHeight() const {
+    return screenHeight;
 }
 
 SDL_Rect Camera::getViewport() const {
